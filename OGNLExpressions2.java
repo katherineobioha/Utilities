@@ -66,6 +66,47 @@ public class OGNLExpression {
             return testDataList;
         }
         
+        // Handle regex pattern matching expression: #user.matches("[0-9]{5}|[0-9]{9}")
+        if (ognlExpression.contains("#user.matches(")) {
+            String conditionalPart = ognlExpression.split("\\?")[0].trim();
+            String regexPart = ognlExpression.split("\\?")[1].trim();
+            
+            // Process the regex pattern
+            Matcher regexMatcher = Pattern.compile("#user\\.matches\\(\"([^\"]+)\"\\)").matcher(regexPart);
+            String regexPattern = null;
+            if (regexMatcher.find()) {
+                regexPattern = regexMatcher.group(1);
+            }
+            
+            // Generate test data for the conditional part
+            List<Map<String, Object>> conditionalData = generateTestData(conditionalPart, isPositive, false);
+            
+            // Add regex match data
+            for (Map<String, Object> testCase : conditionalData) {
+                if (regexPattern != null) {
+                    if (isPositive) {
+                        // For positive cases, add a valid matching value
+                        if (regexPattern.equals("[0-9]{5}|[0-9]{9}")) {
+                            // Generate either 5 or 9 digit number
+                            String value = random.nextBoolean() 
+                                ? String.format("%05d", random.nextInt(100000))  // 5 digits
+                                : String.format("%09d", random.nextInt(1000000000));  // 9 digits
+                            testCase.put("matches", value);
+                        }
+                    } else {
+                        // For negative cases, add an invalid value
+                        testCase.put("matches", "invalid" + random.nextInt(1000));
+                        if (triggerErrors) {
+                            testCase.put("errorMessage", "Input does not match required pattern: " + regexPattern);
+                        }
+                    }
+                }
+                testDataList.add(testCase);
+            }
+            
+            return testDataList;
+        }
+        
         // Original expression handling
         // Extract ternary variable for original expression
         String ternaryVar = null;
@@ -161,10 +202,16 @@ public class OGNLExpression {
         System.out.println("✅ Positive Test Data: " + generateTestData(ognlExpression1, true, false));
         System.out.println("❌ Negative Test Data (Error-Triggered): " + generateTestData(ognlExpression1, false, true));
         
-        // New test case with variable comparison
+        // Variable comparison expression
         String ognlExpression2 = "#user.age != null ? #user.age != #user.class : true";
         System.out.println("\nVariable comparison expression:");
         System.out.println("✅ Positive Test Data: " + generateTestData(ognlExpression2, true, false));
         System.out.println("❌ Negative Test Data (Error-Triggered): " + generateTestData(ognlExpression2, false, true));
+        
+        // New regex pattern matching expression
+        String ognlExpression3 = "(#user.age in {23, 24, 28} || (#user.age == 30 && #user.country == 'USA')) ? #user.matches(\"[0-9]{5}|[0-9]{9}\") : true";
+        System.out.println("\nRegex pattern matching expression:");
+        System.out.println("✅ Positive Test Data: " + generateTestData(ognlExpression3, true, false));
+        System.out.println("❌ Negative Test Data (Error-Triggered): " + generateTestData(ognlExpression3, false, true));
     }
 }
