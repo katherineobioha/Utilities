@@ -1,0 +1,180 @@
+Can you give me more of a technical design. How I will validate each field on the UI
+
+
+Technical Design Document for Field Validation in a Web Application Using AccelQ
+This section focuses on a technical breakdown of how each UI field will be validated within your AccelQ-based test automation framework.
+
+1. Overview
+This document details the field validation strategy for the web application, covering input fields, dropdowns, checkboxes, radio buttons, buttons, and UI alerts. The validations will be implemented using AccelQ’s Action Models and integrated with data-driven testing for robustness.
+
+2. Validation Approach by Field Type
+Field Type	Validation Type	Implementation in AccelQ
+Text Input Fields	Required field check, Character limit, Special character restrictions, Email/Phone format	Use AccelQ Field Actions to validate UI constraints
+Dropdowns	Default selection, Available options, Disabled state	Use Get List Values and compare with expected
+Checkboxes	Checked/Unchecked state, Default selection	Validate using Check State Action
+Radio Buttons	Only one selection allowed, Default selection	Use Click and Verify Selected Action
+Buttons	Enabled/Disabled state, Tooltip text, Click response	Validate using Button State & Click Action
+Error Messages	Presence of validation messages, Correct error text, UI styling	Use Text Validation & CSS Property Check
+3. Field Validation Implementation in AccelQ
+3.1 Text Input Field Validation
+Example: Email Field Validation
+
+Test Scenarios:
+✅ Validate that the field is required
+✅ Validate that only valid email formats are accepted
+✅ Validate max character limit
+✅ Validate special character restrictions
+
+AccelQ Implementation Steps:
+Check Required Field Validation
+
+Leave the field blank and submit the form.
+Capture error message using Get Text Action and validate against expected.
+Validate Email Format
+
+Enter invalid emails (abc.com, user@com, user@domain)
+Click Submit and capture validation message.
+Verify Max Character Limit
+
+Enter 256+ characters and check if field truncates the input.
+Check Special Character Restrictions
+
+Enter forbidden characters (!@#$%^&*()) and validate error message.
+AccelQ Action Model Example:
+yaml
+Copy code
+Action Name: Validate Email Field
+Steps:
+  - Enter invalid email: "abc.com"
+  - Click Submit button
+  - Get error message text
+  - Compare with expected: "Please enter a valid email address"
+3.2 Dropdown Validation
+Example: Country Selection Dropdown
+
+Test Scenarios:
+✅ Verify default selection (e.g., "Select Country")
+✅ Verify all expected countries are present
+✅ Verify dropdown is disabled when necessary
+
+AccelQ Implementation Steps:
+Verify Default Selection
+
+Use Get Selected Value Action and compare with expected.
+Verify Available Options
+
+Use Get List Values Action and validate against a predefined list.
+Verify Disabled State
+
+Attempt selection when the dropdown is disabled and capture error message.
+AccelQ Action Model Example:
+yaml
+Copy code
+Action Name: Validate Country Dropdown
+Steps:
+  - Get Selected Value
+  - Compare with Expected: "Select Country"
+  - Get All Dropdown Options
+  - Validate Options List with Expected
+3.3 Checkbox Validation
+Example: Terms and Conditions Checkbox
+
+Test Scenarios:
+✅ Validate that the checkbox is unchecked by default
+✅ Validate that clicking toggles the checkbox state
+✅ Validate that the Submit button remains disabled if unchecked
+
+AccelQ Implementation Steps:
+Verify Default Unchecked State
+
+Use Check State Action to ensure it is not selected.
+Verify Toggle Functionality
+
+Click the checkbox and check the state again.
+Verify Submit Button Behavior
+
+Ensure the button remains disabled when unchecked.
+AccelQ Action Model Example:
+yaml
+Copy code
+Action Name: Validate Terms Checkbox
+Steps:
+  - Verify Checkbox is Unchecked
+  - Click Checkbox
+  - Verify Checkbox is Checked
+  - Verify Submit Button State
+3.4 Button Validation
+Example: Submit Button
+
+Test Scenarios:
+✅ Validate button is disabled when required fields are empty
+✅ Validate button becomes enabled when all inputs are valid
+✅ Validate button triggers expected action on click
+
+AccelQ Implementation Steps:
+Verify Disabled State Initially
+
+Use Get Button State Action to check if disabled.
+Verify Enabled State After Input
+
+Fill required fields and check if button is enabled.
+Verify Button Click Action
+
+Click the button and validate the next page or message.
+AccelQ Action Model Example:
+yaml
+Copy code
+Action Name: Validate Submit Button
+Steps:
+  - Verify Button is Disabled Initially
+  - Enter Valid Data in All Fields
+  - Verify Button is Enabled
+  - Click Button
+  - Validate Navigation or Success Message
+3.5 Error Message Validation
+Example: Password Field Validation
+
+Test Scenarios:
+✅ Validate error message appears for missing password
+✅ Validate password strength indicator (Weak/Medium/Strong)
+✅ Validate error message disappears when input is corrected
+
+AccelQ Implementation Steps:
+Trigger Error Message
+
+Leave the field blank and click submit.
+Capture the error message using Get Text Action.
+Verify Password Strength Indicator
+
+Enter different password combinations and validate the UI message.
+Verify Error Disappearance
+
+Enter a valid password and check if the error disappears.
+AccelQ Action Model Example:
+yaml
+Copy code
+Action Name: Validate Password Field
+Steps:
+  - Leave Password Field Blank
+  - Click Submit
+  - Get Error Message Text
+  - Compare with Expected: "Password is required"
+  - Enter Weak Password: "12345"
+  - Verify Strength Indicator: "Weak"
+  - Enter Strong Password: "P@ssw0rd123!"
+  - Verify Strength Indicator: "Strong"
+  - Verify Error Disappears
+4. Summary & Integration with CI/CD
+Feature	Validation Approach	AccelQ Action
+Text Fields	Required, Format, Max Length	Get Text, Compare, Validate
+Dropdowns	Default, Options, Disabled	Get List Values, Validate Selection
+Checkboxes	Checked State, Default	Check State Action
+Buttons	Enabled/Disabled, Click Response	Get Button State, Click and Validate
+Error Messages	Presence, Disappearance	Get Text, Validate Message
+✅ CI/CD Integration: These validation test cases will be executed via AccelQ’s CI/CD plugin in Jenkins/GitHub Actions to ensure continuous test automation.
+
+Next Steps
+✅ Implement test suites for Smoke, Regression, and Edge Case Testing.
+✅ Expand automation coverage for API field validation.
+✅ Integrate AI-based self-healing for UI elements in AccelQ.
+This technical design document provides a detailed validation strategy for each field in your web application using AccelQ. Let me know if you want to refine or add more details!
